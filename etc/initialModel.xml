@@ -1,0 +1,10 @@
+<AGMModel>
+
+	<symbol id="1" type="robot">
+	</symbol>
+	<symbol id="2" type="status">
+	</symbol>
+
+	<link src="1" dst="2" label="bored" />
+
+</AGMModel>
