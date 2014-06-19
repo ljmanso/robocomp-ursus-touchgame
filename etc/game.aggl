@@ -1,182 +1,172 @@
 spacePattern=3
-lineThickness=2.5
-name=lokito
+lineThickness=2
+fontName=Arial
+name=game
 vertexDiameter=40
 shortPattern=1
-nodeThickness=2.5
+nodeThickness=2
+fontSize=14
 longPattern=3
 ===
-init : active(2)
-{
-	{
-		S:startsymbol(100,100)
-	}
-	=>
-	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
-	}
-}
-
 ballFound : active(2)
 {
 	{
-		loki:robot(100,100)
+		r:robot(100,90)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
 	}
 }
 
-ballLostWhileHappy : active(2)
+ballLostWhileHappy : passive(1)
 {
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		ball:ball(300,100)
-		loki->ball(sees)
-		loki->status(happy)
+		r:robot(100,100)
+		b:ball(300,100)
+		s:status(100,250)
+		r->b(sees)
+		r->s(happy)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
 	}
 }
 
-ballLostWhileBored : active(2)
+ballLostWhileBored : passive(1)
 {
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		status:status(100,250)
-		loki->ball(sees)
-		loki->status(bored)
+		r:robot(100,100)
+		b:ball(300,100)
+		s:status(100,250)
+		r->b(sees)
+		r->s(bored)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
 	}
 }
 
-ballCentered : active(2)
+ballCentered : active(1)
 {
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
-		loki->ball(fixates)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
+		r->b(fixates)
 	}
 }
 
-ballNotCentered : active(2)
+ballNotCentered : passive(1)
 {
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
-		loki->ball(fixates)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
+		r->b(fixates)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
 	}
 }
 
-ballTouched : active(2)
+ballTouched : active(1)
 {
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		status:status(100,250)
-		loki->ball(fixates)
-		loki->status(bored)
+		r:robot(100,100)
+		b:ball(300,100)
+		s:status(100,250)
+		r->b(fixates)
+		r->s(bored)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		status:status(100,250)
-		loki->status(happy)
-		loki->ball(fixates)
-		loki->ball(touches)
+		r:robot(100,100)
+		b:ball(300,100)
+		s:status(100,250)
+		r->s(happy)
+		r->b(fixates)
+		r->b(touches)
 	}
 }
 
-ballNotTouched : active(2)
+ballNotTouched : active(1)
 {
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
-		loki->ball(touches)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
+		r->b(touches)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		ball:ball(300,100)
-		loki->ball(sees)
+		r:robot(100,100)
+		b:ball(300,100)
+		r->b(sees)
 	}
 }
 
-setRest : active(2)
+setRest : active(1)
 {
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
-		loki->status(rest)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
+		r->s(rest)
 	}
 }
 
-unsetRest : active(2)
+unsetRest : active(1)
 {
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
-		loki->status(rest)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
+		r->s(rest)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
 	}
 }
 
-gotBored : active(2)
+gotBored : passive(1)
 {
 	{
-		loki:robot(100,100)
-		status:status(100,250)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(happy)
 	}
 	=>
 	{
-		loki:robot(100,100)
-		status:status(100,250)
-		loki->status(bored)
+		r:robot(100,100)
+		s:status(100,250)
+		r->s(bored)
 	}
 }
 
