@@ -41,6 +41,65 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 }
 
+void SpecificWorker::ballFound()
+{
+	static float a = 0;
+
+	float tx =    0. + 500.*cos(a);
+	float ty = 1000. + 200.*sin(a);
+	float tz =  800.;
+	QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz), "robot");
+	printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));
+
+	sendRightHandPose(QVec::vec3(400, 400, 400), QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+	saccadic3D(poseTr,QVec::vec3(0,    -1,   0));
+	
+	usleep(300000);
+	a += 0.18;
+}
+
+void SpecificWorker::ballCentered()
+{
+	int32_t ball = atoi(params["b"].value.c_str());
+	int32_t robot = atoi(params["r"].value.c_str());
+	try
+	{
+		const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
+		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
+		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
+		QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz), "robot");
+		printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
+		saccadic3D(poseTr,QVec::vec3(0,-1,0));
+		
+		///meter en el modelo en el arco fixates
+		worldModel->addEdgeByIdentifiers(robot,ball,"fixates");
+		bool modify =true;
+		if (modify)
+		{
+			printf("MODIFIED!\n");
+			try
+			{		
+				RoboCompAGMWorldModel::Event e;
+				AGMModel::SPtr newModel(new AGMModel(worldModel));
+				e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
+				AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
+				AGMModelConverter::fromInternalToIce(newModel, e.newModel);
+				// 	AGMModelPrinter::printWorld(newModel);
+				agmagenttopic->modificationProposal(e);
+			}
+			catch(...)
+			{
+				exit(1);
+			}
+		}
+		
+	}
+	catch(AGMModelException &e)
+	{
+		printf("I don't know object %d\n", ball);
+	}
+}
+
 
 void SpecificWorker::ballTouched()
 {
@@ -102,47 +161,38 @@ void SpecificWorker::ballTouched()
 	}
 }
 
-void SpecificWorker::ballCentered()
+void SpecificWorker::resetGame()
 {
-	int32_t ball = atoi(params["b"].value.c_str());
-	int32_t robot = atoi(params["r"].value.c_str());
-	try
+	sleep(3);
+	
+	
+	int32_t robot = worldModel->getIdentifierByType("robot");
+	int32_t status = worldModel->getIdentifierByType("status");
+
+	worldModel->removeEdgeByIdentifiers(robot, status, "happy");
+	worldModel->addEdgeByIdentifiers(robot, status, "bored");
+
+	for (AGMModel::iterator itModel=worldModel->begin(); itModel!=worldModel->end(); itModel++)
 	{
-		const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
-		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
-		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
-		QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz), "robot");
-		printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
-		saccadic3D(poseTr,QVec::vec3(0,-1,0));
-		
-		///meter en el modelo en el arco fixates
-		worldModel->addEdgeByIdentifiers(robot,ball,"fixates");
-		bool modify =true;
-		if (modify)
+		if (itModel->symbolType == "ball")
 		{
-			printf("MODIFIED!\n");
-			try
-			{		
-				RoboCompAGMWorldModel::Event e;
-				AGMModel::SPtr newModel(new AGMModel(worldModel));
-				e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
-				AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
-				AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-				printf("<<%d\n", newModel->numberOfSymbols());
-				// 	AGMModelPrinter::printWorld(newModel);
-				agmagenttopic->modificationProposal(e);
-				printf(">>\n");
-			}
-			catch(...)
-			{
-				exit(1);
-			}
+			worldModel->removeSymbol(itModel->identifier);
 		}
-		
 	}
-	catch(AGMModelException &e)
+
+	try
+	{		
+		RoboCompAGMWorldModel::Event e;
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
+		AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
+		AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
+		//AGMModelPrinter::printWorld(worldModel);
+		agmagenttopic->modificationProposal(e);
+	}
+	catch(...)
 	{
-		printf("I don't know object %d\n", ball);
+		exit(1);
 	}
 }
 
@@ -152,7 +202,12 @@ void SpecificWorker::compute( )
 	usleep(500000);
 
 	printf("action: %s\n", action.c_str());
-	if (action == "ballcentered")
+	if (action == "ballfound")
+	{
+		ballFound();
+		
+	}
+	else if (action == "ballcentered")
 	{
 		ballCentered();
 		
@@ -160,6 +215,10 @@ void SpecificWorker::compute( )
 	else if (action == "balltouched" )
 	{
 		ballTouched();
+	}
+	else if (action == "none" )
+	{
+		resetGame();
 	}
 	else
 	{

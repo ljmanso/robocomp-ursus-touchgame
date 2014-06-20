@@ -56,11 +56,12 @@ private:
 	bool active;
 	
 	
-	void ballTouched();
+	void ballFound();
 	void ballCentered();
+	void ballTouched();
+	void resetGame();
 	
-	void take();		
-	
+
 private:
 	inline void sendRightHandPose(QVec t, QVec r, QVec wt, QVec wr);
 	inline void sendRightHandPose(QVec t, QVec r, float wtx, float wty, float wtz, float wrx, float wry, float wrz);
