@@ -1,4 +1,4 @@
-VIRTUAL="0"
+ºVIRTUAL="0"
 VIRTUAL="1"
 
 
@@ -87,7 +87,11 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/rob
 qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && bin/apriltagsagentcomp  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/aprilAgent.conf'
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'aprilAgent'
 
-
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus/components/missionAgent'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && bin/missionagent  --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/mission.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'mission'
 
 
 # AGM Executive

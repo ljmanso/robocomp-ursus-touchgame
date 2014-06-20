@@ -97,7 +97,7 @@ void SpecificWorker::compute( )
 		bool found = false;
 		for (AGMModel::iterator itModel=worldModel->begin(); itModel!=worldModel->end(); itModel++)
 		{
-			if (itModel->symbolType == "object")
+			if (itModel->symbolType == "ball")
 			{
 				if (itMap->second.id == str2int(itModel->attributes["id"]))
 				{
@@ -121,7 +121,7 @@ void SpecificWorker::compute( )
 	std::vector<int32_t> symbolsToRemove;
 	for (AGMModel::iterator itModel=worldModel->begin(); itModel!=worldModel->end(); itModel++)
 	{
-		if (itModel->symbolType == "object")
+		if (itModel->symbolType == "ball")
 		{
 			printf("* Stored %d\n", str2int(itModel->attributes["id"]));
 			bool found = false;
@@ -138,22 +138,6 @@ void SpecificWorker::compute( )
 			{
 				printf("    NOT found\n");
 				modelModified = true;
-				for (AGMModelSymbol::iterator itEdge=itModel->edgesBegin(newModel); itEdge!=itModel->edgesEnd(newModel); itEdge++)
-				{
-					if (itEdge->linking == "prop")
-					{
-						// If the object is known, we should also remove its type label
-						AGMModelSymbol::SPtr class_p = newModel->getSymbol(itEdge->symbolPair.second);
-						if (class_p->symbolType == "class")
-						{
-							for (AGMModelSymbol::iterator itEdgeClass=class_p->edgesBegin(newModel); itEdgeClass!=class_p->edgesEnd(newModel); itEdgeClass++)
-							{
-								symbolsToRemove.push_back(itEdgeClass->symbolPair.second);
-							}
-						}
-						symbolsToRemove.push_back(itEdge->symbolPair.second);
-					}
-				}
 				symbolsToRemove.push_back(itModel->identifier);
 			}
 		}
@@ -174,31 +158,6 @@ void SpecificWorker::compute( )
 	
 	
 	
-	/// 
-	printf("%s\n", action.c_str());
-	if (action == "findobjectvisually")
-	{
-	}
-	else if (action == "setobjectreach")
-	{
-		try
-		{
-			AGMModelSymbol::SPtr r = newModel->getSymbolByIdentifier(atoi(params["r"].value.c_str()));
-			r->symbolType = "reach";
-			printf("dentro!\n");
-			modelModified = true;
-		}
-		catch(...)
-		{
-		}
-	}
-	else if (action == "graspobject")
-	{
-	}
-	else
-	{
-		printf("no action\n");
-	}
 
 	if (modelModified)
 	{
@@ -259,8 +218,8 @@ void SpecificWorker::includeObjectInModel(AGMModel::SPtr &newModel, const AprilT
 		return;
 	}
 	/// object
-	AGMModelSymbol::SPtr newTag = newModel->newSymbol("object");
-	newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "know");
+	AGMModelSymbol::SPtr newTag = newModel->newSymbol("ball");
+	newModel->addEdgeByIdentifiers(robotId, newTag->identifier, "sees");
 	newTag->attributes["id"] = int2str(tag.id);
 	newTag->attributes["tx"] = float2str(tag.tx);
 	newTag->attributes["ty"] = float2str(tag.ty);
@@ -268,39 +227,6 @@ void SpecificWorker::includeObjectInModel(AGMModel::SPtr &newModel, const AprilT
 	newTag->attributes["rx"] = float2str(tag.rx);
 	newTag->attributes["ry"] = float2str(tag.ry);
 	newTag->attributes["rz"] = float2str(tag.rz);
-	/// see
-	AGMModelSymbol::SPtr   see_p = newModel->newSymbol("see");
-	newModel->addEdgeByIdentifiers(newTag->identifier, see_p->identifier, "prop");
-	/// reach
-	AGMModelSymbol::SPtr reach_p = newModel->newSymbol("noReach");
-	newModel->addEdgeByIdentifiers(newTag->identifier, reach_p->identifier, "prop");
-	/// pose
-	AGMModelSymbol::SPtr  pose_p = newModel->newSymbol("pose");
-	newModel->addEdgeByIdentifiers(newTag->identifier, pose_p->identifier, "prop");
-
-
-	/// TAG-DEPENDENT CODE
-	/// class
-	AGMModelSymbol::SPtr class_p;
-	AGMModelSymbol::SPtr type_p;
-	switch(tag.id)
-	{
-	case 0:
-		class_p = newModel->newSymbol("class");
-		newModel->addEdgeByIdentifiers(newTag->identifier, class_p->identifier, "prop");
-		type_p = newModel->newSymbol("table");
-		newModel->addEdgeByIdentifiers(class_p->identifier, type_p->identifier, "prop");
-		break;
-	case 2:
-		class_p = newModel->newSymbol("class");
-		newModel->addEdgeByIdentifiers(newTag->identifier, class_p->identifier, "prop");
-		type_p = newModel->newSymbol("mug");
-		newModel->addEdgeByIdentifiers(class_p->identifier, type_p->identifier, "prop");
-		break;
-	default:
-		AGMModelSymbol::SPtr class_p = newModel->newSymbol("noClass");
-		newModel->addEdgeByIdentifiers(newTag->identifier, class_p->identifier, "prop");
-	}
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)

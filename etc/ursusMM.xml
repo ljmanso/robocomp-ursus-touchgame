@@ -517,9 +517,9 @@
 		</transform>
 -->
 	</transform>
-	<transform id="mesaT" tx="0" ty="810"  tz="1000" >
+<!--	<transform id="mesaT" tx="0" ty="810"  tz="1000" >
 		<plane id="mesa" ny="-1" size="216,-279,10" texture="/home/robocomp/robocomp/files/innermodel/tar36h11-0.png" />
-	</transform>
+	</transform>-->
 
 </innerModel>
 

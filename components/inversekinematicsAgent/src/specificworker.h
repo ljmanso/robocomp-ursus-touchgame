@@ -55,19 +55,11 @@ private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	bool active;
 	
-	void stateMachine();
-	///states functions.
-	void stop();
-	void closeHand();
-	void approachFinger();
-	void touchFinger();
-	void openHand();
-	void approachHand();	
-	void grasp();
-	void take();
 	
-	void ajusteFino();
+	void ballTouched();
+	void ballCentered();
 	
+	void take();		
 	
 private:
 	inline void sendRightHandPose(QVec t, QVec r, QVec wt, QVec wr);
