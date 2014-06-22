@@ -73,6 +73,11 @@ private:
 	void includeObjectInModel(AGMModel::SPtr &newModel, const AprilTagModel &tag);
 	bool updateWristPose();
 
+	
+	void updateInnerModel(AGMModel::SPtr newModel);
+	void removeUnseenTags(AGMModel::SPtr newModel);
+	void includeOrUpdateTags(AGMModel::SPtr newModel, bool &modelWasModified);
+
 private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	bool active;
