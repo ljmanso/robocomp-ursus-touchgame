@@ -45,7 +45,7 @@ void SpecificWorker::ballFound()
 	float ty = 1000. + 200.*sin(a);
 	float tz =  700.;
 	QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz), "robot");
-	printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));
+	printf("gooooooo T saccadic3D =(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));
 
 	sendRightHandPose(QVec::vec3(400, 400, 400), QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
 	saccadic3D(poseTr,QVec::vec3(0,    -1,   0));
@@ -64,7 +64,7 @@ void SpecificWorker::ballCentered()
 		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
 		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
 		QVec poseTr = innerModel->transform("world", QVec::vec3(tx, ty, tz), "robot");
-		printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
+		printf("gooooooo RIGHTARM T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
 		saccadic3D(poseTr,QVec::vec3(0,-1,0));
 		
 		/// Include "fixates" edge
