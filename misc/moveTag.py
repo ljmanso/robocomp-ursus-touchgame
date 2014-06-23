@@ -36,13 +36,17 @@ class C(QWidget):
 
 		self.tick = 0
 		self.lado = 1.
-		self.check = QPushButton("move", self)
-		self.check.show()
+		self.butt = QPushButton("move", self)
+		self.connect(self.butt, SIGNAL('clicked()'), self.moveTag);
+
+		self.butt.show()
 
 		self.show()
 		
-
 	def job(self):
+		pass
+
+	def moveTag(self):
 		if self.tick % 40 == 0:
 			pose = self.mods['RoboCompInnerModelManager'].Pose3D()
 			pose.x  = 100.+200.*self.lado
