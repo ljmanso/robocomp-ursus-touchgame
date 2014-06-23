@@ -36,7 +36,7 @@ class C(QWidget):
 
 		self.tick = 0
 		self.lado = 1.
-		self.check = QCheckBox("move", self)
+		self.check = QPushButton("move", self)
 		self.check.show()
 
 		self.show()

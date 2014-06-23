@@ -160,18 +160,7 @@ void SpecificWorker::compute( )
 	// Send modification if needed
 	if (modelWasModified)
 	{
-		try
-		{
-			newModel->removeDanglingEdges();
-			printf("<<MODIFIED!\n");
-			AGMModelPrinter::printWorld(newModel);
-			printf(">>MODIFIED!\n");
-			AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
-		}
-		catch(...)
-		{
-			exit(1);
-		}
+		sendModificationProposal(worldModel, newModel);
 	}
 }
 
@@ -429,4 +418,16 @@ bool SpecificWorker::updateWristPose()
 	return false;
 }
 
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+{
+	try
+	{		
+		//AGMModelPrinter::printWorld(newModel);
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "april");
+	}
+	catch(...)
+	{
+		exit(1);
+	}
+}
 

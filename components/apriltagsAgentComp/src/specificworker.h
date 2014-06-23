@@ -81,6 +81,7 @@ private:
 private:
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	bool active;
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 
 private:
 	std::string action;

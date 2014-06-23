@@ -68,22 +68,14 @@ void SpecificWorker::ballCentered()
 		printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
 		saccadic3D(poseTr,QVec::vec3(0,-1,0));
 		
-		/// meter en el modelo en el arco fixates
+		/// Include "fixates" edge
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		newModel->addEdgeByIdentifiers(robot, ball, "fixates");
 
 		bool modify = true;
 		if (modify)
 		{
-			try
-			{
-				AGMModelPrinter::printWorld(newModel);
-				AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
-			}
-			catch(...)
-			{
-				exit(1);
-			}
+			sendModificationProposal(worldModel, newModel);
 		}
 		
 	}
@@ -96,82 +88,54 @@ void SpecificWorker::ballCentered()
 
 void SpecificWorker::ballTouched()
 {
-	int32_t ball = atoi(params["b"].value.c_str());
-	int32_t robot = atoi(params["r"].value.c_str());
-	int32_t status = atoi(params["s"].value.c_str());
+	const int32_t ball = atoi(params["b"].value.c_str());
+	const int32_t robot = atoi(params["r"].value.c_str());
+	const int32_t status = atoi(params["s"].value.c_str());
 
 	try
 	{
 		const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
 		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
 		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
-
-		QVec offset = QVec::vec3(0., -60., 0.);
-		QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz)+offset, "robot");
-
-		printf("gooooooo T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
-		sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+		const QVec offset = QVec::vec3(0., -60., 0.);
+		const QVec targetRobot = QVec::vec3(tx, ty, tz) + offset;
 		
-		if ()
+		const QVec error = innerModel->transform("robot", QVec::vec3(0,0,0), "grabPositionHandR");
+
+		// If the hand is far from the target, move the hand
+		if (error.norm2() > 100.)
+		{
+			const QVec poseTr = innerModel->transform("world", targetRobot, "robot");
+			printf("gooooooo T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
+			sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+		}
+		// If the hand is close to the target, acknowledge the new state
+		else
 		{
 			AGMModel::SPtr newModel(new AGMModel(worldModel));
-
-			// meter touches.
+			// set "touches" link
 			newModel->addEdgeByIdentifiers(robot, ball, "touches");
-			// borrar bored por happy
+			// make the robot "happy"
 			newModel->removeEdgeByIdentifiers(robot, status, "bored");
 			newModel->addEdgeByIdentifiers(robot, status, "happy");
-			try
-			{
-				newModel->removeDanglingEdges();
-				AGMModelPrinter::printWorld(newModel);
-				AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
-			}
-			catch(...)
-			{
-				exit(1);
-			}
+			// send modification proposal
+			sendModificationProposal(worldModel, newModel);
 		}
 	}
 	catch(AGMModelException &e)
 	{
-		printf("I don't know object %d\n", ball);
+		printf("I don't know ball %d\n", ball);
 	}
 }
 
 void SpecificWorker::resetGame()
 {
 	sleep(3);
-	
-	
-	AGMModel::SPtr newModel(new AGMModel(worldModel));
 
-	int32_t robot = newModel->getIdentifierByType("robot");
-	int32_t status = newModel->getIdentifierByType("status");
+	AGMModel::SPtr newModel(new AGMModel());
+	AGMModelConverter::fromXMLToInternal("/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/initialModel.xml", newModel);
 
-	newModel->removeEdgeByIdentifiers(robot, status, "happy");
-	newModel->addEdgeByIdentifiers(robot, status, "bored");
-
-	for (AGMModel::iterator itModel=newModel->begin(); itModel!=newModel->end(); itModel++)
-	{
-		if (itModel->symbolType == "ball")
-		{
-			newModel->removeSymbol(itModel->identifier);
-		}
-	}
-
-	try
-	{		
-		newModel->removeDanglingEdges();
-		printf("<<MODIFIED!\n");
-		AGMModelPrinter::printWorld(newModel);
-		printf(">>MODIFIED!\n");
-		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
-	}
-	catch(...)
-	{
-		exit(1);
-	}
+	sendModificationProposal(worldModel, newModel);
 }
 
 ///slot
@@ -393,7 +357,7 @@ void SpecificWorker::sendRightHandPose(float tx, float ty, float tz, float rx, f
 
 void SpecificWorker::saccadic3D(QVec point, QVec axis)
 {
-	saccadic3D(point(0), point(1), point(2)+100, axis(0), axis(1), axis(2));
+	saccadic3D(point(0), point(1), point(2)+200, axis(0), axis(1), axis(2));
 }
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
@@ -420,6 +384,18 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 // printf("%s: %d\n", __FILE__, __LINE__);
 }
 
+void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+{
+	try
+	{		
+		//AGMModelPrinter::printWorld(newModel);
+		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
+	}
+	catch(...)
+	{
+		exit(1);
+	}
+}
 
 
 

@@ -60,7 +60,8 @@ private:
 	void ballCentered();
 	void ballTouched();
 	void resetGame();
-	
+
+	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 
 private:
 	inline void sendRightHandPose(QVec t, QVec r, QVec wt, QVec wr);
