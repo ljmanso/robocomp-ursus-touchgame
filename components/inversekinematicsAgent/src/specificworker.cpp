@@ -50,8 +50,8 @@ void SpecificWorker::ballFound()
 	sendRightHandPose(QVec::vec3(400, 400, 400), QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
 	saccadic3D(poseTr,QVec::vec3(0,    -1,   0));
 	
-	usleep(300000);
-	a += 0.18;
+	usleep(150000);
+	a += 0.1;
 }
 
 void SpecificWorker::ballCentered()
@@ -68,7 +68,7 @@ void SpecificWorker::ballCentered()
 		printf("gooooooo T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
 		saccadic3D(poseTr,QVec::vec3(0,-1,0));
 		
-		///meter en el modelo en el arco fixates
+		/// meter en el modelo en el arco fixates
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		newModel->addEdgeByIdentifiers(robot, ball, "fixates");
 
@@ -76,11 +76,8 @@ void SpecificWorker::ballCentered()
 		if (modify)
 		{
 			try
-			{		
-				newModel->removeDanglingEdges();
-				printf("<<MODIFIED!\n");
+			{
 				AGMModelPrinter::printWorld(newModel);
-				printf(">>MODIFIED!\n");
 				AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
 			}
 			catch(...)
@@ -108,40 +105,26 @@ void SpecificWorker::ballTouched()
 		const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
 		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
 		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
-// 		const float rwtx = str2float(worldModel->getSymbol(robot)->getAttribute("rightwrist_tx"));
-// 		const float rwty = str2float(worldModel->getSymbol(robot)->getAttribute("rightwrist_ty"));
-// 		const float rwtz = str2float(worldModel->getSymbol(robot)->getAttribute("rightwrist_tz"));
 
 		QVec offset = QVec::vec3(0., -60., 0.);
 		QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz)+offset, "robot");
-// 		QVec poseWrist = QVec::vec3(rwtx, rwty, rwtz)+offset;
 
-// printf("%s: %d\n", __FILE__, __LINE__);
 		printf("gooooooo T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
 		sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
 		
-		sleep(3);
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
-
-		//borrar sees y meter touches.
-// 		newModel->removeEdgeByIdentifiers(robot, ball, "sees");
-		newModel->addEdgeByIdentifiers(robot, ball, "touches");
-		
-		//borrar bored por happy
-		newModel->removeEdgeByIdentifiers(robot, status, "bored");
-		newModel->addEdgeByIdentifiers(robot, status, "happy");
-		
-// printf("%s: %d\n", __FILE__, __LINE__);
-		bool modify =true;
-		if (modify)
+		if ()
 		{
-			printf("MODIFIED!\n");
+			AGMModel::SPtr newModel(new AGMModel(worldModel));
+
+			// meter touches.
+			newModel->addEdgeByIdentifiers(robot, ball, "touches");
+			// borrar bored por happy
+			newModel->removeEdgeByIdentifiers(robot, status, "bored");
+			newModel->addEdgeByIdentifiers(robot, status, "happy");
 			try
 			{
 				newModel->removeDanglingEdges();
-				printf("<<MODIFIED!\n");
 				AGMModelPrinter::printWorld(newModel);
-				printf(">>MODIFIED!\n");
 				AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
 			}
 			catch(...)
@@ -149,7 +132,6 @@ void SpecificWorker::ballTouched()
 				exit(1);
 			}
 		}
-// printf("%s: %d\n", __FILE__, __LINE__);
 	}
 	catch(AGMModelException &e)
 	{
@@ -411,7 +393,7 @@ void SpecificWorker::sendRightHandPose(float tx, float ty, float tz, float rx, f
 
 void SpecificWorker::saccadic3D(QVec point, QVec axis)
 {
-	saccadic3D(point(0), point(1), point(2), axis(0), axis(1), axis(2));
+	saccadic3D(point(0), point(1), point(2)+100, axis(0), axis(1), axis(2));
 }
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
