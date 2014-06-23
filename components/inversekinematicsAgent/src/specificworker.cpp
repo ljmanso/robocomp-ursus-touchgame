@@ -50,8 +50,7 @@ void SpecificWorker::ballFound()
 	sendRightHandPose(QVec::vec3(400, 400, 400), QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
 	saccadic3D(poseTr,QVec::vec3(0,    -1,   0));
 	
-	usleep(150000);
-	a += 0.1;
+	a += 0.4;
 }
 
 void SpecificWorker::ballCentered()
@@ -92,21 +91,32 @@ void SpecificWorker::ballTouched()
 	const int32_t robot = atoi(params["r"].value.c_str());
 	const int32_t status = atoi(params["s"].value.c_str());
 
+	printf("\n\n----------\n");
 	try
 	{
+		// Get 
 		const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
 		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
 		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
-		const QVec offset = QVec::vec3(0., -60., 0.);
+		const QVec offset = QVec::vec3(0., 0., -100.);
 		const QVec targetRobot = QVec::vec3(tx, ty, tz) + offset;
 		
-		const QVec error = innerModel->transform("robot", QVec::vec3(0,0,0), "grabPositionHandR");
+		const QVec actualWristPosition = QVec::vec3(
+		 str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tx"]),
+		 str2float(worldModel->getSymbol(robot)->attributes["rightwrist_ty"]),
+		 str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tz"]));
+		
+
+		const QVec error = targetRobot-actualWristPosition;
 
 		// If the hand is far from the target, move the hand
 		if (error.norm2() > 100.)
 		{
+			targetRobot.print("targetRobot");
+			actualWristPosition.print("actualWristPosition");
+			error.print("error");
 			const QVec poseTr = innerModel->transform("world", targetRobot, "robot");
-			printf("gooooooo T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
+			printf("move hand to T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
 			sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
 		}
 		// If the hand is close to the target, acknowledge the new state
@@ -130,8 +140,6 @@ void SpecificWorker::ballTouched()
 
 void SpecificWorker::resetGame()
 {
-	sleep(3);
-
 	AGMModel::SPtr newModel(new AGMModel());
 	AGMModelConverter::fromXMLToInternal("/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/initialModel.xml", newModel);
 
@@ -142,26 +150,28 @@ void SpecificWorker::resetGame()
 void SpecificWorker::compute( )
 {
 // printf("%s: %d\n", __FILE__, __LINE__);
-	usleep(500000);
 
 	printf("action: %s\n", action.c_str());
 	if (action == "ballfound")
 	{
 		ballFound();
-		
+		usleep(1000000);
 	}
 	else if (action == "ballcentered")
 	{
 		ballCentered();
-		
+		usleep(500000);
 	}
 	else if (action == "balltouched" )
 	{
 		ballTouched();
+		usleep(500000);
 	}
 	else if (action == "none" )
 	{
 		resetGame();
+		usleep(3000000);
+
 	}
 	else
 	{
@@ -346,6 +356,7 @@ void SpecificWorker::sendRightHandPose(float tx, float ty, float tz, float rx, f
 	weights.rz = wrz;
 	try
 	{
+		bodyinversekinematics_proxy->stop("RIGHTARM");
 		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 100);
 	}
 	catch(...)
@@ -375,6 +386,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 	float axisAngleConstraint = 0;
 	try
 	{
+		bodyinversekinematics_proxy->stop("HEAD");
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
 	}
 	catch(...)

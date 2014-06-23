@@ -19,6 +19,7 @@
 #
 
 import Ice, sys, math, traceback, time
+import random
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -34,8 +35,6 @@ class C(QWidget):
 		self.prx = self.ic.stringToProxy(endpoint)
 		self.proxy = self.mods['RoboCompInnerModelManager'].InnerModelManagerPrx.checkedCast(self.prx)
 
-		self.tick = 0
-		self.lado = 1.
 		self.butt = QPushButton("move", self)
 		self.connect(self.butt, SIGNAL('clicked()'), self.moveTag);
 
@@ -47,16 +46,20 @@ class C(QWidget):
 		pass
 
 	def moveTag(self):
-		if self.tick % 40 == 0:
-			pose = self.mods['RoboCompInnerModelManager'].Pose3D()
-			pose.x  = 100.+200.*self.lado
-			pose.y  = 914.
-			pose.z  = 300.
-			pose.rx = -0.13
-			pose.ry = 0.0
-			pose.rz = 0.
-			print pose.x, pose.y, pose.z
-			self.proxy.setPoseFromParent("target", pose)
+		pointOk = False
+		while not pointOk:
+			xrand = random.uniform(-200, 200)
+			yrand = random.uniform(-150, 150)
+			if math.sqrt(xrand*xrand + yrand*yrand) < 200:
+				pointOk = True
+		pose = self.mods['RoboCompInnerModelManager'].Pose3D()
+		print xrand, yrand
+		pose.x  = 100.+xrand
+		pose.y  = 950.+yrand
+		pose.z  = 300.
+		pose.rx = -0.13
+		pose.ry = 0.0
+		pose.rz = 0.
+		print pose.x, pose.y, pose.z
+		self.proxy.setPoseFromParent("target", pose)
 
-			self.lado *= -1
-		self.tick += 1
