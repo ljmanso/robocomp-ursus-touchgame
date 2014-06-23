@@ -57,7 +57,7 @@ class C(QWidget):
 		pose.x  = 100.+xrand
 		pose.y  = 950.+yrand
 		pose.z  = 300.
-		pose.rx = -0.13
+		pose.rx = -1.57
 		pose.ry = 0.0
 		pose.rz = 0.
 		print pose.x, pose.y, pose.z
