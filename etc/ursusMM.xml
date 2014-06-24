@@ -24,7 +24,7 @@
 		<differentialrobot id="robot" port="10004" ty="10" >
 
 			<transform  id="base_trans" >
-				<joint id="base" port="20000" axis="y" home="0">
+<!--				<joint id="base" port="20000" axis="y" home="0"> -->
 					<mesh id="base_mesh" file="/home/robocomp/robocomp/files/osgModels/robex/robex.ive"  tx="0" ty="0" tz="0" scale="1000"  />
 
 					<transform id="base_body" rx="-1.5707963267948966" ty="0" tz="-100" >
@@ -500,7 +500,7 @@
 
 					</joint> <!-- joint tronco -->
 				</transform> <!-- base tronco -->
-				</joint> <!-- joint base -->
+		<!--		</joint>  joint base -->
 			</transform> <!-- cambiocoordenadas -->
 		</differentialrobot> <!--base -->
 	</transform>
