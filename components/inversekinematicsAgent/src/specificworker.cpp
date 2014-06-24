@@ -64,7 +64,7 @@ void SpecificWorker::ballCentered()
 		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
 		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
 		QVec poseTr = innerModel->transform("world", QVec::vec3(tx, ty, tz), "robot");
-		printf("gooooooo RIGHTARM T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
+		printf("gooooooo saccadic3D T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
 		saccadic3D(poseTr,QVec::vec3(0,-1,0));
 		
 		/// Include "fixates" edge
@@ -117,7 +117,7 @@ void SpecificWorker::ballTouched()
 			error.print("error");
 			const QVec poseTr = innerModel->transform("world", targetRobot, "robot");
 			printf("move hand to T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
-			sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+			//sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
 		}
 		// If the hand is close to the target, acknowledge the new state
 		else
