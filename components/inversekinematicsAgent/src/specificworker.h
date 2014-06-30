@@ -58,7 +58,7 @@ private:
 	
 	void ballFound();
 	void ballCentered();
-	void ballTouched();
+	void ballTouched(bool ini=false);
 	void resetGame();
 
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);

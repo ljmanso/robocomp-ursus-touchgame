@@ -367,13 +367,13 @@ void SpecificWorker::newAprilTag(const tagsList& tags)
 }
 
 
-bool SpecificWorker::updateWristPose()
+void SpecificWorker::updateWristPose()
 {
 	// Make sure we have the robot in the model, otherwise there's nothing to do yet...
 	int32_t robotId = worldModel->getIdentifierByType("robot");
 	if (robotId == -1)
 	{
-		return false;
+		return;
 	}
 	AGMModelSymbol::SPtr robot = worldModel->getSymbol(robotId);
 
@@ -404,7 +404,7 @@ bool SpecificWorker::updateWristPose()
 	#warning These thresholds should be set in the config file!!!
 	#warning These thresholds should be set in the config file!!!
 	#warning These thresholds should be set in the config file!!!
-	if ( force or (T-T_back).norm2()>15 or (R-R_back).norm2()>0.05)
+	if ( force or (T-T_back).norm2()>5 or (R-R_back).norm2()>0.025)
 	{
 		robot->attributes["rightwrist_tx"] = float2str(T(0));
 		robot->attributes["rightwrist_ty"] = float2str(T(1));
@@ -412,10 +412,10 @@ bool SpecificWorker::updateWristPose()
 		robot->attributes["rightwrist_rx"] = float2str(R(0));
 		robot->attributes["rightwrist_ry"] = float2str(R(1));
 		robot->attributes["rightwrist_rz"] = float2str(R(2));
-		return true;
+		RoboCompAGMWorldModel::Node nodeDst;
+		AGMModelConverter::fromInternalToIce(robot, nodeDst);
+		agmagenttopic->update(nodeDst);
 	}
-	
-	return false;
 }
 
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)

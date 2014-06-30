@@ -20,6 +20,7 @@
 #include "specificworker.h"
 #include <agm.h>
 #include <boost/concept_check.hpp>
+#include <qt4/QtCore/qdatetime.h>
 
 
 /**
@@ -93,14 +94,16 @@ void SpecificWorker::ballCentered()
 }
 
 
-void SpecificWorker::ballTouched()
+void SpecificWorker::ballTouched(bool first)
 {
+	QTime fff;
+	if (first) fff = QTime::currentTime();
+
 	if (tocaButton->isChecked())
 	{
 		tocaButton->setText("tocando");
 		const int32_t ball = atoi(params["b"].value.c_str());
 		const int32_t robot = atoi(params["r"].value.c_str());
-		const int32_t status = atoi(params["s"].value.c_str());
 
 		printf("\n\n----------\n");
 		try
@@ -117,15 +120,23 @@ void SpecificWorker::ballTouched()
 			str2float(worldModel->getSymbol(robot)->attributes["rightwrist_ty"]),
 			str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tz"]));
 			
+			actualWristPosition.print("actualWristPosition");
+			
 
 			const QVec error = targetRobot-actualWristPosition;
 
 			// If the hand is far from the target, move the hand
-			if (error.norm2() > 100.)
+			int32_t extra = 0.05 * (fff.elapsed() - 2000);
+			if (extra<0) extra = 0;
+			if (extra>300) extra = 300;
+			int32_t umbral = 100. + extra;
+			if (error.norm2() > umbral)
 			{
 				targetRobot.print("targetRobot");
 				actualWristPosition.print("actualWristPosition");
 				error.print("error");
+				printf("ERROR: %f\n", error.norm2());
+				printf("UMBRAL: %d\n", umbral);
 				const QVec poseTr = innerModel->transform("world", targetRobot, "robot");
 				printf("move hand to T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
 				sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
@@ -133,14 +144,13 @@ void SpecificWorker::ballTouched()
 			// If the hand is close to the target, acknowledge the new state
 			else
 			{
-				AGMModel::SPtr newModel(new AGMModel(worldModel));
-				// set "touches" link
-				newModel->addEdgeByIdentifiers(robot, ball, "touches");
-				// make the robot "happy"
-				newModel->removeEdgeByIdentifiers(robot, status, "bored");
-				newModel->addEdgeByIdentifiers(robot, status, "happy");
-				// send modification proposal
-				sendModificationProposal(worldModel, newModel);
+				printf("lo conseguimos!!!\n");
+				printf("lo conseguimos!!!\n");
+				printf("lo conseguimos!!!\n");
+				printf("lo conseguimos!!!\n");
+				printf("lo conseguimos!!!\n");
+				printf("lo conseguimos!!!\n");
+				resetGame();
 			}
 		}
 		catch(AGMModelException &e)
@@ -152,6 +162,8 @@ void SpecificWorker::ballTouched()
 
 void SpecificWorker::resetGame()
 {
+	usleep(1000000);
+	bodyinversekinematics_proxy->goHome("RIGHTARM");
 	AGMModel::SPtr newModel(new AGMModel());
 	AGMModelConverter::fromXMLToInternal("/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/initialModel.xml", newModel);
 
@@ -164,6 +176,7 @@ void SpecificWorker::resetGame()
 void SpecificWorker::compute( )
 {
 // printf("%s: %d\n", __FILE__, __LINE__);
+	static std::string lastAction = "---";
 
 	printf("action: %s\n", action.c_str());
 	if (action == "ballfound")
@@ -178,7 +191,7 @@ void SpecificWorker::compute( )
 	}
 	else if (action == "balltouched" )
 	{
-		ballTouched();
+		ballTouched(lastAction!=action);
 		usleep(500000);
 	}
 	else if (action == "none" )
@@ -192,6 +205,7 @@ void SpecificWorker::compute( )
 		printf("ignoring this action (%s)...\n", action.c_str());
 	}
 // printf("%s: %d\n", __FILE__, __LINE__);
+	lastAction = action;
 }
 
 void SpecificWorker::slotStop()

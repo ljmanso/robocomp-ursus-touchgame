@@ -1,5 +1,5 @@
 VIRTUAL="0"
-VIRTUAL="1"
+#VIRTUAL="1"
 
 
 # Ice Storm
@@ -37,7 +37,7 @@ else
 	qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 faulhaberComp' 
 	qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && ./bin/faulhaberComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/faulhaber.conf'
 	qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Faulhaber'
-	sleep 1
+	sleep 4 
 	# dynamixel
 	qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 	sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
@@ -45,7 +45,7 @@ else
 	qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 dynamixelComp'
 	qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && ./bin/dynamixelComp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/dynamixel_head.conf'
 	qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'Dynamixel'
-	sleep 1
+	sleep 2
 	# jointProxy
 	qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
 	sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
