@@ -47,7 +47,15 @@ void SpecificWorker::ballFound()
 	QVec poseTr = innerModel->transform("world", QVec::vec3(tx,ty,tz), "robot");
 	printf("gooooooo T saccadic3D =(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));
 
-	sendRightHandPose(QVec::vec3(400, 400, 400), QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+	//sendRightHandPose(QVec::vec3(400, 400, 400), QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+	try
+	{
+		bodyinversekinematics_proxy->goHome("RIGHTARM");
+	}
+	catch (Ice::Exception e)
+	{
+		qDebug()<<"error talking to bik"<<e.what();
+	}
 	saccadic3D(poseTr,QVec::vec3(0,    -1,   0));
 	
 	a += 0.4;
@@ -352,7 +360,7 @@ void SpecificWorker::sendRightHandPose(float tx, float ty, float tz, float rx, f
 	target.ry = ry;
 	target.rz = rz;
 	RoboCompBodyInverseKinematics::WeightVector weights;
-	weights.x = wtx;
+	weights.x = wtx;	
 	weights.y = wty;
 	weights.z = wtz;
 	weights.rx = wrx;
@@ -361,7 +369,9 @@ void SpecificWorker::sendRightHandPose(float tx, float ty, float tz, float rx, f
 	try
 	{
 		bodyinversekinematics_proxy->stop("RIGHTARM");
+		usleep(500000);
 		bodyinversekinematics_proxy->setTargetPose6D("RIGHTARM", target, weights, 100);
+		usleep(1500000);
 	}
 	catch(...)
 	{
@@ -391,6 +401,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 	try
 	{
 		bodyinversekinematics_proxy->stop("HEAD");
+		usleep(500000);
 		bodyinversekinematics_proxy->pointAxisTowardsTarget("HEAD", targetSight, axSight, axisConstraint, axisAngleConstraint);
 	}
 	catch(...)
