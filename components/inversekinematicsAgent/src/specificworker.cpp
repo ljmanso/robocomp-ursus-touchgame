@@ -87,54 +87,57 @@ void SpecificWorker::ballCentered()
 
 void SpecificWorker::ballTouched()
 {
-	const int32_t ball = atoi(params["b"].value.c_str());
-	const int32_t robot = atoi(params["r"].value.c_str());
-	const int32_t status = atoi(params["s"].value.c_str());
-
-	printf("\n\n----------\n");
-	try
+	if (tocaButton->isChecked())
 	{
-		// Get 
-		const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
-		const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
-		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
-		const QVec offset = QVec::vec3(0., 0., -100.);
-		const QVec targetRobot = QVec::vec3(tx, ty, tz) + offset;
-		
-		const QVec actualWristPosition = QVec::vec3(
-		 str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tx"]),
-		 str2float(worldModel->getSymbol(robot)->attributes["rightwrist_ty"]),
-		 str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tz"]));
-		
+		const int32_t ball = atoi(params["b"].value.c_str());
+		const int32_t robot = atoi(params["r"].value.c_str());
+		const int32_t status = atoi(params["s"].value.c_str());
 
-		const QVec error = targetRobot-actualWristPosition;
+		printf("\n\n----------\n");
+		try
+		{
+			// Get 
+			const float tx = str2float(worldModel->getSymbol(ball)->getAttribute("tx"));
+			const float ty = str2float(worldModel->getSymbol(ball)->getAttribute("ty"));
+			const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
+			const QVec offset = QVec::vec3(0., 0., -100.);
+			const QVec targetRobot = QVec::vec3(tx, ty, tz) + offset;
+			
+			const QVec actualWristPosition = QVec::vec3(
+			str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tx"]),
+			str2float(worldModel->getSymbol(robot)->attributes["rightwrist_ty"]),
+			str2float(worldModel->getSymbol(robot)->attributes["rightwrist_tz"]));
+			
 
-		// If the hand is far from the target, move the hand
-		if (error.norm2() > 100.)
-		{
-			targetRobot.print("targetRobot");
-			actualWristPosition.print("actualWristPosition");
-			error.print("error");
-			const QVec poseTr = innerModel->transform("world", targetRobot, "robot");
-			printf("move hand to T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
-			sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+			const QVec error = targetRobot-actualWristPosition;
+
+			// If the hand is far from the target, move the hand
+			if (error.norm2() > 100.)
+			{
+				targetRobot.print("targetRobot");
+				actualWristPosition.print("actualWristPosition");
+				error.print("error");
+				const QVec poseTr = innerModel->transform("world", targetRobot, "robot");
+				printf("move hand to T=(%.2f, %.2f, %.2f)  \n", poseTr(0), poseTr(1), poseTr(2));
+				sendRightHandPose(poseTr, QVec::vec3(0,0,0), QVec::vec3(1,1,1), QVec::vec3(0,0,0));		
+			}
+			// If the hand is close to the target, acknowledge the new state
+			else
+			{
+				AGMModel::SPtr newModel(new AGMModel(worldModel));
+				// set "touches" link
+				newModel->addEdgeByIdentifiers(robot, ball, "touches");
+				// make the robot "happy"
+				newModel->removeEdgeByIdentifiers(robot, status, "bored");
+				newModel->addEdgeByIdentifiers(robot, status, "happy");
+				// send modification proposal
+				sendModificationProposal(worldModel, newModel);
+			}
 		}
-		// If the hand is close to the target, acknowledge the new state
-		else
+		catch(AGMModelException &e)
 		{
-			AGMModel::SPtr newModel(new AGMModel(worldModel));
-			// set "touches" link
-			newModel->addEdgeByIdentifiers(robot, ball, "touches");
-			// make the robot "happy"
-			newModel->removeEdgeByIdentifiers(robot, status, "bored");
-			newModel->addEdgeByIdentifiers(robot, status, "happy");
-			// send modification proposal
-			sendModificationProposal(worldModel, newModel);
+			printf("I don't know ball %d\n", ball);
 		}
-	}
-	catch(AGMModelException &e)
-	{
-		printf("I don't know ball %d\n", ball);
 	}
 }
 
@@ -143,6 +146,7 @@ void SpecificWorker::resetGame()
 	AGMModel::SPtr newModel(new AGMModel());
 	AGMModelConverter::fromXMLToInternal("/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/initialModel.xml", newModel);
 
+	tocaButton->setChecked(false);
 	sendModificationProposal(worldModel, newModel);
 }
 
