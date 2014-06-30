@@ -89,6 +89,7 @@ void SpecificWorker::ballTouched()
 {
 	if (tocaButton->isChecked())
 	{
+		tocaButton->setText("tocando");
 		const int32_t ball = atoi(params["b"].value.c_str());
 		const int32_t robot = atoi(params["r"].value.c_str());
 		const int32_t status = atoi(params["s"].value.c_str());
@@ -147,6 +148,7 @@ void SpecificWorker::resetGame()
 	AGMModelConverter::fromXMLToInternal("/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/initialModel.xml", newModel);
 
 	tocaButton->setChecked(false);
+	tocaButton->setText("toca?");
 	sendModificationProposal(worldModel, newModel);
 }
 
