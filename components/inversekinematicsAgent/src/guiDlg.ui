@@ -23,7 +23,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>TOCA</string>
+      <string>toca?</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
