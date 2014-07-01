@@ -56,7 +56,7 @@ void AGMCommonBehaviorI::killAgent(const Ice::Current&){
 	worker->killAgent();
 }
 
-int AGMCommonBehaviorI::uptimeAgent(const Ice::Current&){
+Ice::Int AGMCommonBehaviorI::uptimeAgent(const Ice::Current&){
 	return worker->uptimeAgent();
 }
 
