@@ -59,7 +59,7 @@ void SpecificWorker::ballFound()
 	}
 	saccadic3D(poseTr,QVec::vec3(0,    -1,   0));
 	
-	a += 0.4;
+	a += 0.65;
 }
 
 void SpecificWorker::ballCentered()
@@ -74,21 +74,23 @@ void SpecificWorker::ballCentered()
 		const float tz = str2float(worldModel->getSymbol(ball)->getAttribute("tz"));
 		QVec poseTr = innerModel->transform("world", QVec::vec3(tx, ty, tz), "robot");
 		printf("gooooooo saccadic3D T=(%.2f, %.2f, %.2f)\n", poseTr(0), poseTr(1), poseTr(2));				
-		saccadic3D(poseTr,QVec::vec3(0,-1,0));
+		saccadic3D(poseTr, QVec::vec3(0,-1,0));
 		
 		/// Include "fixates" edge
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		newModel->addEdgeByIdentifiers(robot, ball, "fixates");
-
-		bool modify = true;
-		if (modify)
-		{
-			sendModificationProposal(worldModel, newModel);
-		}
-		
+		sendModificationProposal(worldModel, newModel);
 	}
 	catch(AGMModelException &e)
 	{
+		try
+		{
+			speech_proxy->say("acho, pasó algo raro con centered", true);
+		}
+		catch(AGMModelException &e)
+		{
+			printf("acho, pasó algo raro con speech en algo raro con centered\n");
+		}
 		printf("I don't know object %d\n", ball);
 	}
 }
@@ -99,7 +101,7 @@ void SpecificWorker::ballTouched(bool first)
 	QTime fff;
 	if (first) fff = QTime::currentTime();
 
-	if (tocaButton->isChecked())
+// 	if (tocaButton->isChecked())
 	{
 		tocaButton->setText("tocando");
 		const int32_t ball = atoi(params["b"].value.c_str());
@@ -126,9 +128,9 @@ void SpecificWorker::ballTouched(bool first)
 			const QVec error = targetRobot-actualWristPosition;
 
 			// If the hand is far from the target, move the hand
-			int32_t extra = 0.05 * (fff.elapsed() - 2000);
+			int32_t extra = 0.015 * (fff.elapsed() - 2000);
 			if (extra<0) extra = 0;
-			if (extra>300) extra = 300;
+			if (extra>200) extra = 200;
 			int32_t umbral = 100. + extra;
 			if (error.norm2() > umbral)
 			{
@@ -162,6 +164,7 @@ void SpecificWorker::ballTouched(bool first)
 
 void SpecificWorker::resetGame()
 {
+	speech_proxy->say("acho acho", true);
 	usleep(1000000);
 	bodyinversekinematics_proxy->goHome("RIGHTARM");
 	AGMModel::SPtr newModel(new AGMModel());
@@ -177,20 +180,27 @@ void SpecificWorker::compute( )
 {
 // printf("%s: %d\n", __FILE__, __LINE__);
 	static std::string lastAction = "---";
+	bool change = (lastAction != action);
+	lastAction = action;
 
+	if (change) speech_proxy->say(action.c_str(), true);
+	
 	printf("action: %s\n", action.c_str());
 	if (action == "ballfound")
 	{
+		if (change) speech_proxy->say("busco", true);
 		ballFound();
 		usleep(1000000);
 	}
 	else if (action == "ballcentered")
 	{
+		if (change) speech_proxy->say("centro", true);
 		ballCentered();
 		usleep(500000);
 	}
 	else if (action == "balltouched" )
 	{
+		if (change) speech_proxy->say("toco", true);
 		ballTouched(lastAction!=action);
 		usleep(500000);
 	}
@@ -204,8 +214,6 @@ void SpecificWorker::compute( )
 	{
 		printf("ignoring this action (%s)...\n", action.c_str());
 	}
-// printf("%s: %d\n", __FILE__, __LINE__);
-	lastAction = action;
 }
 
 void SpecificWorker::slotStop()
@@ -403,7 +411,6 @@ void SpecificWorker::saccadic3D(QVec point, QVec axis)
 
 void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float axy, float axz)
 {
-// printf("%s: %d\n", __FILE__, __LINE__);
 	RoboCompBodyInverseKinematics::Pose6D targetSight;
 	targetSight.x = tx;
 	targetSight.y = ty;
@@ -424,14 +431,13 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 	{
 		printf("IK connection error\n");
 	}
-// printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
 	try
 	{		
-		//AGMModelPrinter::printWorld(newModel);
+		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
 	}
 	catch(...)

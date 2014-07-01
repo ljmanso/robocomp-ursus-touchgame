@@ -287,6 +287,7 @@ bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs,
 	}
 	catch (...)
 	{
+		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
 		return false;
 	}
 
@@ -398,13 +399,14 @@ void SpecificWorker::updateWristPose()
 	}
 	catch(...)
 	{
+		printf("exception in updateWristPose %d\n", __LINE__);
 		force = true;
 	}
 	#warning These thresholds should be set in the config file!!!
 	#warning These thresholds should be set in the config file!!!
 	#warning These thresholds should be set in the config file!!!
 	#warning These thresholds should be set in the config file!!!
-	if ( force or (T-T_back).norm2()>5 or (R-R_back).norm2()>0.025)
+	if ( force or (T-T_back).norm2()>15 or (R-R_back).norm2()>0.05)
 	{
 		robot->attributes["rightwrist_tx"] = float2str(T(0));
 		robot->attributes["rightwrist_ty"] = float2str(T(1));
