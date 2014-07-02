@@ -115,23 +115,17 @@ void GenericMonitor::readPConfParams(RoboCompCommonBehavior::ParameterList &para
 bool GenericMonitor::configGetString( const std::string name, std::string&value,  const std::string default_value, QStringList *list)
 {
 	value = communicator->getProperties()->getProperty( name );
-
-	if ( value.length() == 0)
+ 	if ( value.length() == 0 and default_value.length() != 0)
 	{
-	   	if (default_value.length() != 0)
-		{
-			value = default_value;
-			return false;
-		}
-		else if (default_value.length() == 0)
-		{
-			QString error = QString("empty configuration string, not default value for")+QString::fromStdString(name);
-			qDebug() << error;
-			throw error;
-		}
+		value = default_value;
+		return false;
 	}
-
-	if (list != NULL)
+	else if (default_value.length() == 0)
+	{
+		QString error = QString("empty configuration string, not default value for")+QString::fromStdString(name);
+		throw error;
+	}
+ 	if (list != NULL)
 	{
 		if (list->contains(QString::fromStdString(value)) == false)
 		{
@@ -139,10 +133,8 @@ bool GenericMonitor::configGetString( const std::string name, std::string&value,
 			rError("Reading config file:"+name+" is not a valid string");
 		}
 		QString error = QString("not valid configuration value");
-		qDebug() << error;
 		throw error;
 	}
-
 	std::cout << name << " " << value << std::endl;
-	return true; 
+	return true;
 }

@@ -117,7 +117,6 @@ void inversekinematicsAgentComp::initialize()
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
-
 int inversekinematicsAgentComp::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
@@ -130,7 +129,8 @@ int inversekinematicsAgentComp::run(int argc, char* argv[])
 	// Remote server proxy access example
 	// RemoteComponentPrx remotecomponent_proxy;
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
-SpeechPrx speech_proxy;
+	SpeechPrx speech_proxy;
+	AGMAgentTopicPrx agmagenttopic_proxy;
 
 
 	string proxy;
@@ -169,7 +169,7 @@ SpeechPrx speech_proxy;
 		return EXIT_FAILURE;
 	}
 	rInfo("BodyInverseKinematicsProxy initialized Ok!");
-	mprx["BodyInverseKinematicsProxy"] = (::IceProxy::Ice::Object*)(&bodyinversekinematics_proxy);//Remote server proxy creation example
+	mprx["BodyInverseKinematicsProxy"] = (::IceProxy::Ice::Object*)(&bodyinversekinematics_proxy);
 	try
 	{
 		speech_proxy = SpeechPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("SpeechProxy") ) );
@@ -182,16 +182,16 @@ SpeechPrx speech_proxy;
 	rInfo("SpeechProxy initialized Ok!");
 	mprx["SpeechProxy"] = (::IceProxy::Ice::Object*)(&speech_proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
+	
 	IceStorm::TopicPrx agmagenttopic_topic;
     while(!agmagenttopic_topic){
 		try {
-			agmagenttopic_topic = topicManager->create(communicator()->getProperties()->getProperty("AGMAgentTopic"));
-		}catch (const IceStorm::TopicExists&){
-		  	// Another client created the topic.
+			agmagenttopic_topic = topicManager->retrieve("AGMAgentTopic");
+		}catch (const IceStorm::NoSuchTopic&){
 			try{
-				agmagenttopic_topic = topicManager->retrieve(communicator()->getProperties()->getProperty("AGMAgentTopic"));
-			}catch (const IceStorm::NoSuchTopic&){
-				//Error. Topic does not exist.	
+				agmagenttopic_topic = topicManager->create("AGMAgentTopic");
+			}catch (const IceStorm::TopicExists&){
+				// Another client created the topic.
 			}
 		}
 	}
@@ -221,20 +221,15 @@ SpeechPrx speech_proxy;
     	AGMExecutiveTopicPtr agmexecutivetopicI_ = new AGMExecutiveTopicI(worker);
     	Ice::ObjectPrx agmexecutivetopic_proxy = AGMExecutiveTopic_adapter->addWithUUID(agmexecutivetopicI_)->ice_oneway();
     	IceStorm::TopicPrx agmexecutivetopic_topic;
-    	if(!agmexecutivetopic_topic){
+    	while(!agmexecutivetopic_topic){
 	    	try {
-	    		agmexecutivetopic_topic = topicManager->create("AGMExecutiveTopic");
+	    		agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
+	    	 	IceStorm::QoS qos;
+	      		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic_proxy);
 	    	}
-	    	catch (const IceStorm::TopicExists&) {
-	    	  	//Another client created the topic
-	    	  	try{
-	       			agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
-	    	  	}catch(const IceStorm::NoSuchTopic&){
-	    	  	  	//Error. Topic does not exist
-				}
+	    	catch (const IceStorm::NoSuchTopic&) {
+	       		// Error! No topic found!
 	    	}
-	    	IceStorm::QoS qos;
-	      	agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic_proxy);
     	}
     	AGMExecutiveTopic_adapter->activate();
     	// Server adapter creation and publication
@@ -290,3 +285,4 @@ int main(int argc, char* argv[])
 	else
 		return app.main(argc, argv, "../etc/generic_config"); // "config" is the default config file name
 }
+
