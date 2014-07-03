@@ -17,6 +17,15 @@ qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'sh startSpee
 qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'speech'
 sleep 1
 
+# FaceTablet
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.addSession
+sess=`qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.activeSessionId`
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cd /home/robocomp/robocomp/components/robocomp-ursus/components/FaceTabletControlComp/'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'killall -9 facetabletcontrolcomp'
+qdbus org.kde.yakuake /yakuake/sessions org.kde.yakuake.runCommand 'cmake . && make -j1 && ./bin/facetabletcontrolcomp --Ice.Config=/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/faceTablet.conf'
+qdbus org.kde.yakuake /yakuake/tabs org.kde.yakuake.setTabTitle $sess 'FaceTablet'
+sleep 1
+
 
 
 if [ "$VIRTUAL" = "1" ]; then
