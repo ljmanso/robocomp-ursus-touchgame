@@ -164,7 +164,16 @@ void SpecificWorker::ballTouched(bool first)
 
 void SpecificWorker::resetGame()
 {
-	speech_proxy->say("He llegado", true);		
+	try{
+		speech_proxy->say("He llegado", true);		
+	}
+	catch (Ice::Exception e)
+	{
+		qDebug()<<"error talking to face tablet";
+	}
+	
+	
+	
 	usleep(1000000);
 	bodyinversekinematics_proxy->goHome("RIGHTARM");
 	usleep(3000000);
@@ -190,13 +199,28 @@ void SpecificWorker::compute( )
 	{
 		if (change)
 		{
-			speech_proxy->say("busco", true);
+			try
+			{
+				speech_proxy->say("busco", true);
+			}
+			catch (Ice::Exception e)
+			{
+				qDebug()<<"error talking to face tablet";
+			}
+			
 			RoboCompFaceTabletUrsus::valuesList vList;
 			vList.clear();
 			RoboCompFaceTabletUrsus::values v;
 			v.idES = 5;//neutral
 			vList.push_back(v);
-			face_proxy->newFaceTabletUrsus(vList);
+			try
+			{
+				face_proxy->newFaceTabletUrsus(vList);
+			}
+			catch (Ice::Exception e)
+			{
+				qDebug()<<"error talking to face tablet";
+			}
 			
 		}
 		ballFound();
@@ -214,7 +238,15 @@ void SpecificWorker::compute( )
 		RoboCompFaceTabletUrsus::values v;
 		v.idES = 4;//happy
 		vList.push_back(v);
-		face_proxy->newFaceTabletUrsus(vList);
+		
+		try 
+		{
+			face_proxy->newFaceTabletUrsus(vList);
+		}
+		catch (Ice::Exception e)
+		{
+			qDebug()<<"error talking to face tablet";
+		}
 		
 		ballTouched(lastAction!=action);
 		usleep(500000);
