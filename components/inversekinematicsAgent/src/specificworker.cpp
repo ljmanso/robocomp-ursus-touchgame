@@ -164,7 +164,7 @@ void SpecificWorker::ballTouched(bool first)
 
 void SpecificWorker::resetGame()
 {
-	speech_proxy->say("He llegado", true);
+	speech_proxy->say("He llegado", true);		
 	usleep(1000000);
 	bodyinversekinematics_proxy->goHome("RIGHTARM");
 	usleep(3000000);
@@ -188,7 +188,17 @@ void SpecificWorker::compute( )
 	printf("action: %s\n", action.c_str());
 	if (action == "ballfound")
 	{
-		if (change) speech_proxy->say("busco", true);
+		if (change)
+		{
+			speech_proxy->say("busco", true);
+			RoboCompFaceTabletUrsus::valuesList vList;
+			vList.clear();
+			RoboCompFaceTabletUrsus::values v;
+			v.idES = 5;//neutral
+			vList.push_back(v);
+			face_proxy->newFaceTabletUrsus(vList);
+			
+		}
 		ballFound();
 		usleep(1000000);
 	}
@@ -199,6 +209,13 @@ void SpecificWorker::compute( )
 	}
 	else if (action == "balltouched" )
 	{
+		RoboCompFaceTabletUrsus::valuesList vList;
+		vList.clear();
+		RoboCompFaceTabletUrsus::values v;
+		v.idES = 4;//happy
+		vList.push_back(v);
+		face_proxy->newFaceTabletUrsus(vList);
+		
 		ballTouched(lastAction!=action);
 		usleep(500000);
 	}
