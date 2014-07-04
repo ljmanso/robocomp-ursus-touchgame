@@ -13,8 +13,7 @@ SET ( SOURCES
   ${SOURCES}
   inversekinematicsagentcomp.cpp
   agmcommonbehaviorI.cpp
-agmexecutivetopicI.cpp
-
+  agmexecutivetopicI.cpp
   genericmonitor.cpp
   commonbehaviorI.cpp
   genericworker.cpp
@@ -34,7 +33,7 @@ agmexecutivetopicI.h
 )
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning BodyInverseKinematics AGMAgent  AGMWorldModel Speech)
+ROBOCOMP_WRAP_ICE( CommonBehavior  AGMCommonBehavior AGMExecutive Planning BodyInverseKinematics AGMAgent AGMWorldModel Speech FaceTabletUrsus )
 SET (EXECUTABLE_OUTPUT_PATH ../bin)
 
 # Qt4
@@ -52,3 +51,5 @@ QT4_WRAP_UI( UI_HEADERS guiDlg.ui )
 ADD_EXECUTABLE( inversekinematicsagentcomp ${SOURCES} ${MOC_SOURCES} ${RC_SOURCES} ${UI_HEADERS} )
 TARGET_LINK_LIBRARIES( inversekinematicsagentcomp ${QT_LIBRARIES} ${LIBS} ${STATIC_LIBS} ${SPECIFIC_LIBS})
 INSTALL(FILES ${EXECUTABLE_OUTPUT_PATH}/inversekinematicsagentcomp DESTINATION /opt/robocomp/bin/ PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
+
+

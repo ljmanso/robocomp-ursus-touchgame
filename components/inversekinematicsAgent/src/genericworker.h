@@ -31,6 +31,7 @@
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
+#include <FaceTabletUrsus.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -45,6 +46,7 @@ using namespace std;
 */
 using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompSpeech;
+using namespace RoboCompFaceTabletUrsus;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMAgent;
@@ -67,6 +69,7 @@ public:
 
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
 	SpeechPrx speech_proxy;
+	FaceTabletUrsusPrx face_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;

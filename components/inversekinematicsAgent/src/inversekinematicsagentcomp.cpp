@@ -85,6 +85,7 @@
 #include <BodyInverseKinematics.h>
 #include <Speech.h>
 #include <AGMAgent.h>
+#include <FaceTabletUrsus.h>
 
 
 // User includes here
@@ -97,6 +98,7 @@ using namespace RoboCompAGMExecutive;
 using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompSpeech;
 using namespace RoboCompAGMAgent;
+using namespace RoboCompFaceTabletUrsus;
 
 
 class inversekinematicsAgentComp : public RoboComp::Application
@@ -131,7 +133,7 @@ int inversekinematicsAgentComp::run(int argc, char* argv[])
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
 	SpeechPrx speech_proxy;
 	AGMAgentTopicPrx agmagenttopic_proxy;
-
+	FaceTabletUrsusPrx face_proxy;
 
 	string proxy;
 
@@ -170,6 +172,8 @@ int inversekinematicsAgentComp::run(int argc, char* argv[])
 	}
 	rInfo("BodyInverseKinematicsProxy initialized Ok!");
 	mprx["BodyInverseKinematicsProxy"] = (::IceProxy::Ice::Object*)(&bodyinversekinematics_proxy);
+
+
 	try
 	{
 		speech_proxy = SpeechPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("SpeechProxy") ) );
@@ -181,6 +185,21 @@ int inversekinematicsAgentComp::run(int argc, char* argv[])
 	}
 	rInfo("SpeechProxy initialized Ok!");
 	mprx["SpeechProxy"] = (::IceProxy::Ice::Object*)(&speech_proxy);
+
+	
+	try
+	{
+		face_proxy = FaceTabletUrsusPrx::uncheckedCast( communicator()->stringToProxy( getProxyString("FaceTabletUrsusProxy") ) );
+	}
+	catch(const Ice::Exception& ex)
+	{
+		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
+		return EXIT_FAILURE;
+	}
+	rInfo("FaceTabletUrsusProxy initialized Ok!");
+	mprx["FaceTabletUrsusProxy"] = (::IceProxy::Ice::Object*)(&face_proxy);
+	
+
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
 	
 	IceStorm::TopicPrx agmagenttopic_topic;

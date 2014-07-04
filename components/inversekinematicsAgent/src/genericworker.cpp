@@ -30,6 +30,7 @@ QObject()
 {
 	bodyinversekinematics_proxy = (*(BodyInverseKinematicsPrx*)mprx["BodyInverseKinematicsProxy"]);
 	speech_proxy = (*(SpeechPrx*)mprx["SpeechProxy"]);
+	face_proxy = (*(FaceTabletUrsusPrx*)mprx["FaceTabletUrsusProxy"]);
 	agmagenttopic = (*(AGMAgentTopicPrx*)mprx["AGMAgentTopicPub"]);
 
 	mutex = new QMutex();
