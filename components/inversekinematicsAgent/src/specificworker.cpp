@@ -164,14 +164,16 @@ void SpecificWorker::ballTouched(bool first)
 
 void SpecificWorker::resetGame()
 {
-	speech_proxy->say("acho acho", true);
+	speech_proxy->say("He llegado", true);
 	usleep(1000000);
 	bodyinversekinematics_proxy->goHome("RIGHTARM");
+	usleep(3000000);
 	AGMModel::SPtr newModel(new AGMModel());
 	AGMModelConverter::fromXMLToInternal("/home/robocomp/robocomp/components/robocomp-ursus-touchgame/etc/initialModel.xml", newModel);
 
 	tocaButton->setChecked(false);
 	tocaButton->setText("toca?");
+	
 	sendModificationProposal(worldModel, newModel);
 }
 
@@ -183,8 +185,6 @@ void SpecificWorker::compute( )
 	bool change = (lastAction != action);
 	lastAction = action;
 
-	if (change) speech_proxy->say(action.c_str(), true);
-	
 	printf("action: %s\n", action.c_str());
 	if (action == "ballfound")
 	{
@@ -194,13 +194,11 @@ void SpecificWorker::compute( )
 	}
 	else if (action == "ballcentered")
 	{
-		if (change) speech_proxy->say("centro", true);
 		ballCentered();
 		usleep(500000);
 	}
 	else if (action == "balltouched" )
 	{
-		if (change) speech_proxy->say("toco", true);
 		ballTouched(lastAction!=action);
 		usleep(500000);
 	}
