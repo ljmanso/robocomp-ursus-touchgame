@@ -215,7 +215,7 @@ void SpecificWorker::compute( )
 			vList.push_back(v);
 			try
 			{
-				face_proxy->newFaceTabletUrsus(vList);
+				facetabletursus_proxy->newFaceTabletUrsus(vList);
 			}
 			catch (Ice::Exception e)
 			{
@@ -241,7 +241,7 @@ void SpecificWorker::compute( )
 		
 		try 
 		{
-			face_proxy->newFaceTabletUrsus(vList);
+			facetabletursus_proxy->newFaceTabletUrsus(vList);
 		}
 		catch (Ice::Exception e)
 		{
@@ -483,7 +483,7 @@ void SpecificWorker::saccadic3D(float tx, float ty, float tz, float axx, float a
 void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
 {
 	try
-	{		
+	{	qDebug()<<"UUUU↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓UUUUUUUUU";	
 		AGMModelPrinter::printWorld(newModel);
 		AGMMisc::publishModification(newModel, agmagenttopic, worldModel, "ik");
 	}

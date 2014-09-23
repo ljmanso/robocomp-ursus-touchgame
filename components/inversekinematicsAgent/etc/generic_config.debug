@@ -10,6 +10,7 @@ AGMExecutiveTopicTopic.Endpoints=tcp -p 10243
 # Remote servers proxies example
 #RemoteProxy = remote:tcp -h remotehost -p 10001
 
+FaceTabletUrsusProxy = facetabletursus:tcp -h localhost -p 12216
 BodyInverseKinematicsProxy = bodyinversekinematics:tcp -h localhost -p 10220
 SpeechProxy = speech:tcp -h localhost -p 10021
 

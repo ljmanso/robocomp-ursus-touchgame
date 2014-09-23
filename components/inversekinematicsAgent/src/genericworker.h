@@ -19,6 +19,8 @@
 #ifndef GENERICWORKER_H
 #define GENERICWORKER_H
 
+// #include <ipp.h>
+#include "config.h"
 #include <QtGui>
 #include <stdint.h>
 #include <qlog/qlog.h>
@@ -26,12 +28,12 @@
 #include <ui_guiDlg.h>
 #include "config.h"
 #include <agm.h>
+#include <FaceTabletUrsus.h>
 #include <BodyInverseKinematics.h>
 #include <Speech.h>
 #include <AGMAgent.h>
 #include <AGMCommonBehavior.h>
 #include <AGMExecutive.h>
-#include <FaceTabletUrsus.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
@@ -44,12 +46,17 @@ using namespace std;
        \brief
        @author authorname
 */
+using namespace RoboCompFaceTabletUrsus;
 using namespace RoboCompBodyInverseKinematics;
 using namespace RoboCompSpeech;
-using namespace RoboCompFaceTabletUrsus;
 using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMExecutive;
 using namespace RoboCompAGMAgent;
+struct BehaviorNavegacionParameters 
+		{
+			RoboCompPlanning::Action action;
+			std::vector< std::vector <std::string> > plan;
+		};
 class GenericWorker :
 #ifdef USE_QTGUI
 public QWidget, public Ui_guiDlg
@@ -67,9 +74,14 @@ public:
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;                //Shared mutex with servant
 
+		
+	bool activate(const BehaviorNavegacionParameters& parameters);
+	bool deactivate();
+	bool isActive() { return active; }
+	RoboCompAGMWorldModel::BehaviorResultType status();
+	FaceTabletUrsusPrx facetabletursus_proxy;
 	BodyInverseKinematicsPrx bodyinversekinematics_proxy;
 	SpeechPrx speech_proxy;
-	FaceTabletUrsusPrx face_proxy;
 	AGMAgentTopicPrx agmagenttopic;
 	virtual bool activateAgent(const ParameterMap& prs) = 0;
 	virtual bool deactivateAgent() = 0;
@@ -77,7 +89,7 @@ public:
 	virtual ParameterMap getAgentParameters() = 0;
 	virtual bool setAgentParameters(const ParameterMap& prs) = 0;
 	virtual void  killAgent() = 0;
-	virtual int uptimeAgent() = 0;
+	virtual Ice::Int uptimeAgent() = 0;
 	virtual bool reloadConfigAgent() = 0;
 	virtual void  modelModified(const RoboCompAGMWorldModel::Event& modification) = 0;
 	virtual void  modelUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
@@ -85,6 +97,13 @@ public:
 protected:
 	QTimer timer;
 	int Period;
+	int iter;
+	bool active;
+	AGMModel::SPtr worldModel;
+	ParameterMap params;
+	BehaviorNavegacionParameters p;
+	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+	RoboCompPlanning::Action createAction(std::string s);
 public slots:
 	virtual void compute() = 0;
 signals:
